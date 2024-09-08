@@ -35,23 +35,42 @@ const getItems = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
-    .then(() => res.send({ message: "Successfully deleted" }))
-    .catch((err) => {
-      console.error(`Error ${err.name} with message ${err.message}`);
+  const userId = req.user._id;
 
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: "Document not found" });
+  //
+  ClothingItem.findById(itemId)
+    .orFail()
+    .then((item) => {
+      if (item.owner.toString() !== userId) {
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "You do not have permission to delete this item" });
       }
-      if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
-      }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      return ClothingItem.findByIdAndDelete(itemId)
+        .then(() =>
+          res.send({
+            message: "Item successfully deleted",
+          })
+        )
+        .catch((err) => {
+          console.error(`Error ${err.name} with message ${err.message}`);
+
+          if (err.name === "DocumentNotFoundError") {
+            return res
+              .status(NOT_FOUND)
+              .send({ message: "Document not found" });
+          }
+          if (err.name === "CastError") {
+            return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+          }
+
+          return res
+            .status(INTERNAL_SERVER_ERROR)
+            .send({ message: "An error has occurred on the server" });
+        });
     });
 };
+//
 const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -60,7 +79,7 @@ const likeItem = (req, res) => {
   )
     .orFail()
     .then((item) => {
-      res.status(200).send({ data: item });
+      res.send({ data: item });
     })
     .catch((err) => {
       console.error(`Error ${err.name} with message ${err.message}`);

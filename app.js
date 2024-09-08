@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const mainRouter = require("./routes/index");
 
 const app = express();
@@ -16,12 +17,7 @@ mongoose
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "61eade4c6d5acf558c42d9b8",
-  };
-  next();
-});
+app.use(cors());
 
 app.use("/", mainRouter);
 
