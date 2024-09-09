@@ -1,3 +1,5 @@
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const {
   BAD_REQUEST,
@@ -10,9 +12,10 @@ const JWT_SECRET = require("../utils/config");
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
+
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ name, avatar, email }))
+    .then(() => User.create({ name, avatar, email }))
 
     .then((user) => res.status(201).send(user))
     .catch((err) => {
@@ -69,16 +72,19 @@ const getCurrentUser = (req, res) => {
   const userId = req.user._id;
 
   User.findById(userId)
+    .orFail()
     .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
-      }
       res.send(user);
     })
+
     .catch((err) => {
-      res
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: "User not found" });
+      }
+      return res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ mesage: "An error has occurred on the server" });
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -95,22 +101,20 @@ const updateUser = (req, res) => {
       if (!updatedUser) {
         return res.status(NOT_FOUND).send({ message: "User not found" });
       }
-      res.send(updatedUser);
+      return res.send(updatedUser);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid data" });
       }
-      res
+      return res
         .status(INTERNAL_SERVER_ERROR)
         .send({ mesage: "An error has occurred on the server" });
     });
 };
 
 module.exports = {
-  getUsers,
   createUser,
-  getUser,
   loginUser,
   getCurrentUser,
   updateUser,

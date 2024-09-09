@@ -56,11 +56,6 @@ const deleteItem = (req, res) => {
         .catch((err) => {
           console.error(`Error ${err.name} with message ${err.message}`);
 
-          if (err.name === "DocumentNotFoundError") {
-            return res
-              .status(NOT_FOUND)
-              .send({ message: "Document not found" });
-          }
           if (err.name === "CastError") {
             return res.status(BAD_REQUEST).send({ message: "Invalid data" });
           }
@@ -69,6 +64,21 @@ const deleteItem = (req, res) => {
             .status(INTERNAL_SERVER_ERROR)
             .send({ message: "An error has occurred on the server" });
         });
+    })
+    .catch((err) => {
+      console.error(`Error ${err.name} with message ${err.message}`);
+
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: "Document not found" });
+      }
+
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+      }
+
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 //
