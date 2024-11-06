@@ -35,7 +35,6 @@ app.get("/crash-test", () => {
 app.use(requestLogger);
 app.use("/", mainRouter);
 
-app.use();
 app.use(errorLogger);
 
 app.use(errors());
