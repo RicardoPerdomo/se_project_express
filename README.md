@@ -11,3 +11,7 @@ Mongoose and Postman are implemented in this project as methods to make and test
 `npm run start` — to launch the server
 
 `npm run dev` — to launch the server with the hot reload feature
+
+Domain Name
+
+- https://wtwrsubdomain.strangled.net/
