@@ -11,8 +11,8 @@ const {
 } = require("../middlewares/validation");
 
 router.use("/items", itemRouter);
-router.post("/signin", loginUser, validateUserLogIn);
-router.post("/signup", createUser, validateUserSignUp);
+router.post("/signin", validateUserLogIn, loginUser);
+router.post("/signup", validateUserSignUp, createUser);
 router.use(auth);
 router.use("/users", userRouter);
 
